@@ -3,13 +3,11 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nvimFlake.url = "github:gako358/nvimFlakes";
   };
 
   outputs =
     { self
     , nixpkgs
-    , nvimFlake
     ,
     }:
     let
@@ -208,65 +206,11 @@
         import nixpkgs {
           inherit system;
           overlays = [
-            nvimFlake.overlays.default
             (self: super: {
               linuxDev = self.linuxPackagesFor kernel;
               busybox = super.busybox.override {
                 enableStatic = true;
               };
-              nvimConfig = pkgs:
-                lib.neovimBuilder {
-                  inherit pkgs;
-                  config = {
-                    vim.viAlias = true;
-                    vim.vimAlias = true;
-                    vim.autoIndent = true;
-
-                    vim.treesitter.enable = true;
-                    vim.lsp = {
-                      enable = true;
-                      lightbulb.enable = true;
-                      nvimCodeActionMenu.enable = true;
-                      trouble.enable = true;
-
-                      # Language servers:
-                      python = true;
-                      clang = true;
-                      bash = true;
-                      nix = true;
-                    };
-
-                    vim.theme.scheme = "borealis";
-
-                    vim.visuals = {
-                      enable = true;
-                      nvimAutoPairs.enable = true;
-                      nvimWebDevicons.enable = true;
-                      lightSpeed.enable = true;
-                      nvimComment.enable = true;
-                      indentBlankline.enable = true;
-                      toggleTerm.enable = true;
-                      bufferline.enable = true;
-                      filetree.enable = true;
-                      noice.enable = true;
-                      status.bar = "lualine";
-                    };
-
-                    vim.autocomplete.enable = true;
-
-                    vim.git = {
-                      gitsigns.enable = true;
-                      lazygit.enable = true;
-                    };
-
-                    vim.keys = {
-                      enable = true;
-                      whichKey.enable = true;
-                    };
-
-                    vim.telescope.enable = true;
-                  };
-                };
             })
           ];
         };
@@ -291,7 +235,6 @@
           bear # for compile_commands.json, use bear -- make
           runQemuV2
           git
-          nvimConfig
           gdb
           qemu
         ]
