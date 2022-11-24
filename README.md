@@ -1,58 +1,30 @@
-The kernel
-----------
+# The kernel
 
-The C kernel will just print an 'X' on the top left corner of the screen.
+```
+runvm   # Calls QEMU with the necessary commands, uses sudo for enabling kvm
 
-The dummy function does nothing. That function will force 
-to create a kernel entry routine which does not point to byte 0x0 in our kernel, but
-to an actual label which we know that launches it. In this case, function `main()`.
+#### Inside QEMU
+# insmod module/helloworld.ko   # Load the kernel module
+# rmmod module/helloworld.ko    # Unload the module
+#### C^A+X to exit
 
-`i386-elf-gcc -ffreestanding -c kernel.c -o kernel.o`
+cd helloworld
+bear -- make            # generate the compile_commands.json
+vim helloworld.c        # Start editing!
 
-To compile this file, instead of generating
-a binary, we will generate an `elf` format file which will be linked with `kernel.o`
+# exit and then nix develop .# or just direnv reload
+# to rebuild and update the runvm command
+```
 
-`nasm kernel_entry.asm -f elf -o kernel_entry.o`
+## Kernel Build
 
+In order to do this in Nix a custom config file is generated using a modified version of the configfile
+derivation in the generic kernel builder also known as the buildLinux function.
+This was necessary as the default NixOS distribution defaults needed to be removed.
+More documentation is inside the flake. A new package set called linuxDev is then added
+as an overlay using linuxPackagesFor. The initial ram disk is built using the new make-initrd-ng.
+It is called through its nix wrapper which safely copies the nix store packages needed over.
+Busybox is included and the helloworld kernel module.
 
-The linker
-----------
-
-To link both object files into a single binary kernel and resolve label references,
-run:
-
-`i386-elf-ld -o kernel.bin -Ttext 0x1000 kernel_entry.o kernel.o --oformat binary`
-
-The kernel will be placed not at `0x0` in memory, but at `0x1000`. The
-bootsector will need to know this address too.
-
-
-The bootsector
---------------
-
-Compile it with `nasm bootsect.asm -f bin -o bootsect.bin`
-
-
-Putting it all together
------------------------
-
-Concatenate them:
-
-`cat bootsect.bin kernel.bin > os-image.bin`
-
-
-Run!
-----
-
-You can now run `os-image.bin` with qemu.
-
-Remember that if you find disk load errors you may need to play with the disk numbers
-or qemu parameters (floppy = `0x0`, hdd = `0x80`). I usually use `qemu-system-i386 -fda os-image.bin`
-
-You will see four messages:
-
-- "Started in 16-bit Real Mode"
-- "Loading kernel into memory"
-- (Top left) "Landed in 32-bit Protected Mode"
-- (Top left, overwriting previous message) "X"
-
+The initial ramdisk is built using `make-initrd-ng`, called through its nix wrapper which copies the
+nix store packages needed over.
