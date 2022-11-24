@@ -18,13 +18,14 @@ vim helloworld.c        # Start editing!
 
 ## Kernel Build
 
-In order to do this in Nix a custom config file is generated using a modified version of the configfile
-derivation in the generic kernel builder also known as the buildLinux function.
+In order to do this in Nix a custom config file is generated, using a modified version of the configfile
+derivation in the generic kernel builder, also known as the buildLinux function.
 This was necessary as the default NixOS distribution defaults needed to be removed.
 More documentation is inside the flake. A new package set called linuxDev is then added
-as an overlay using linuxPackagesFor. The initial ram disk is built using the new make-initrd-ng.
+as an overlay using `linuxPackagesFor`. The initial ram disk is built using the new `make-initrd-ng`.
 It is called through its nix wrapper which safely copies the nix store packages needed over.
-Busybox is included and the helloworld kernel module.
+`Busybox` is included and the helloworld kernel module.
 
-The initial ramdisk is built using `make-initrd-ng`, called through its nix wrapper which copies the
-nix store packages needed over.
+## Credits
+This is based on [jordanisaacs](https://github.com/jordanisaacs/kernel-module-flake) flake, to get started with kernel modules.
+
